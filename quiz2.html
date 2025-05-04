@@ -1,0 +1,762 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Quiz Application</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1a1c2c 0%, #4a2160 100%);
+            min-height: 100vh;
+            transition: background 0.5s ease;
+            color: #fff;
+        }
+        
+        .theme-light {
+            background: linear-gradient(135deg, #2c3e50 0%, #4a69bd 100%);
+        }
+        
+        .card {
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            background: rgba(30, 30, 46, 0.7);
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(106, 17, 203, 0.4);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(106, 17, 203, 0.6);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            box-shadow: 0 4px 15px rgba(245, 87, 108, 0.4);
+        }
+        
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(245, 87, 108, 0.6);
+        }
+        
+        .option-btn {
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.08);
+        }
+        
+        .option-btn:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .correct {
+            background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%) !important;
+            color: #1a202c !important;
+            box-shadow: 0 4px 15px rgba(0, 176, 155, 0.5) !important;
+        }
+        
+        .incorrect {
+            background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%) !important;
+            color: #fff !important;
+            box-shadow: 0 4px 15px rgba(255, 65, 108, 0.5) !important;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .progress-bar {
+            height: 8px;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+        
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            border-radius: 50%;
+            animation: fall 3s ease-in infinite;
+            box-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+        }
+        
+        @keyframes fall {
+            0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+        }
+        
+        .glow {
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+        }
+        
+        .neon-border {
+            box-shadow: 0 0 10px rgba(106, 17, 203, 0.7), 
+                        0 0 20px rgba(106, 17, 203, 0.5), 
+                        0 0 30px rgba(106, 17, 203, 0.3);
+        }
+        
+        .difficulty-btn {
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .difficulty-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+            z-index: -1;
+        }
+        
+        .difficulty-btn:hover::before {
+            left: 100%;
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+        
+        @keyframes floating {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        .gradient-text {
+            background: linear-gradient(to right, #ff8a00, #da1b60);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center p-4">
+    <div id="confetti-container" class="fixed top-0 left-0 w-full h-full pointer-events-none"></div>
+    
+    <div class="container max-w-3xl">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-4xl font-bold text-white glow floating">Interactive <span class="gradient-text">Quiz</span> Application</h1>
+            <button id="theme-toggle" class="p-3 bg-white bg-opacity-10 rounded-full hover:bg-opacity-20 transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+            </button>
+        </div>
+        
+        <!-- User Input Screen -->
+        <div id="user-input-screen" class="card rounded-xl p-8 mb-6 fade-in neon-border">
+            <h2 class="text-3xl font-semibold text-white mb-8 text-center glow">Welcome to the Quiz!</h2>
+            <div class="space-y-6">
+                <div>
+                    <label for="name" class="block text-white mb-2 text-lg">Enter your name:</label>
+                    <input type="text" id="name" class="w-full p-4 rounded-lg bg-white bg-opacity-10 border border-white border-opacity-20 text-white placeholder-white placeholder-opacity-50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all" placeholder="Your name">
+                </div>
+                <div>
+                    <label for="age" class="block text-white mb-2 text-lg">Enter your age:</label>
+                    <input type="number" id="age" class="w-full p-4 rounded-lg bg-white bg-opacity-10 border border-white border-opacity-20 text-white placeholder-white placeholder-opacity-50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all" placeholder="Your age" min="1" max="120">
+                </div>
+                <button id="start-btn" class="w-full btn-primary text-white font-medium py-4 px-6 rounded-lg mt-6 text-lg pulse">Start Quiz</button>
+            </div>
+        </div>
+        
+        <!-- Difficulty Selection Screen -->
+        <div id="difficulty-screen" class="card rounded-xl p-8 mb-6 hidden fade-in neon-border">
+            <h2 class="text-3xl font-semibold text-white mb-8 text-center glow">Select Difficulty Level</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <button class="difficulty-btn btn-primary text-white font-medium py-6 px-6 rounded-lg" data-difficulty="easy">
+                    <div class="text-2xl mb-3">Easy</div>
+                    <div class="text-sm opacity-80">Basic questions for beginners</div>
+                </button>
+                <button class="difficulty-btn btn-primary text-white font-medium py-6 px-6 rounded-lg" data-difficulty="normal">
+                    <div class="text-2xl mb-3">Normal</div>
+                    <div class="text-sm opacity-80">Standard difficulty questions</div>
+                </button>
+                <button class="difficulty-btn btn-primary text-white font-medium py-6 px-6 rounded-lg" data-difficulty="hard">
+                    <div class="text-2xl mb-3">Hard</div>
+                    <div class="text-sm opacity-80">Challenging questions for experts</div>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="hidden fade-in">
+            <div class="flex justify-between items-center mb-6">
+                <div class="text-white text-lg">
+                    <span id="user-info" class="font-medium"></span>
+                </div>
+                <div class="text-white text-xl bg-white bg-opacity-10 px-4 py-2 rounded-full">
+                    <span id="score-display" class="font-medium">Score: 0</span>
+                </div>
+            </div>
+            
+            <div class="w-full bg-white bg-opacity-10 rounded-full h-3 mb-8">
+                <div id="progress-bar" class="progress-bar bg-gradient-to-r from-purple-500 to-pink-500 rounded-full" style="width: 0%"></div>
+            </div>
+            
+            <div class="card rounded-xl p-8 mb-8 neon-border">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 id="question-number" class="text-2xl font-semibold text-white">Question 1/5</h2>
+                    <div id="difficulty-badge" class="px-4 py-2 rounded-full text-sm font-medium bg-gradient-to-r from-purple-500 to-pink-500 text-white">Easy</div>
+                </div>
+                
+                <h3 id="question-text" class="text-3xl font-semibold text-white mb-8 glow">Question text goes here?</h3>
+                
+                <div id="options-container" class="space-y-4">
+                    <!-- Options will be inserted here -->
+                </div>
+            </div>
+            
+            <div id="feedback-container" class="card rounded-xl p-6 mb-8 hidden">
+                <div id="feedback-text" class="text-white text-lg"></div>
+            </div>
+            
+            <div class="flex justify-between">
+                <button id="next-btn" class="btn-primary text-white font-medium py-4 px-8 rounded-lg hidden text-lg">Next Question</button>
+                <button id="finish-btn" class="btn-secondary text-white font-medium py-4 px-8 rounded-lg hidden text-lg pulse">Finish Quiz</button>
+            </div>
+        </div>
+        
+        <!-- Results Screen -->
+        <div id="results-screen" class="card rounded-xl p-8 hidden fade-in neon-border">
+            <h2 class="text-3xl font-semibold text-white mb-8 text-center glow">Quiz Results</h2>
+            
+            <div class="bg-white bg-opacity-10 rounded-lg p-8 mb-8 border border-white border-opacity-10">
+                <div class="flex justify-between items-center mb-6">
+                    <div class="text-white text-xl font-medium">Final Score:</div>
+                    <div id="final-score" class="text-white text-3xl font-bold gradient-text">0/5</div>
+                </div>
+                
+                <div class="w-full bg-white bg-opacity-10 rounded-full h-6 mb-4">
+                    <div id="score-bar" class="bg-gradient-to-r from-purple-500 to-pink-500 rounded-full h-6" style="width: 0%"></div>
+                </div>
+                
+                <div id="performance-text" class="text-white text-center mt-6 text-xl"></div>
+            </div>
+            
+            <div id="question-summary" class="space-y-6 mb-8">
+                <!-- Question summary will be inserted here -->
+            </div>
+            
+            <div class="flex justify-between">
+                <button id="restart-btn" class="btn-primary text-white font-medium py-4 px-8 rounded-lg text-lg">Restart Quiz</button>
+                <button id="new-quiz-btn" class="btn-secondary text-white font-medium py-4 px-8 rounded-lg text-lg">New Quiz</button>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="mt-10 text-center text-white text-opacity-70 text-sm">
+            <p>Object Oriented Programming - Lab Project</p>
+            <p class="mt-2">Submitted by: Urooj Fatima (24108238), Zunaira Rafiq (24108242), Shehnaz Bibi (24108230)</p>
+        </div>
+    </div>
+
+    <script>
+        // Quiz data
+        const quizData = {
+            easy: [
+                {
+                    question: "What does OOP stand for?",
+                    options: ["Object Oriented Programming", "Ordered Output Processing", "Online Operating Platform", "Object Output Protocol"],
+                    correctAnswer: 0,
+                    explanation: "OOP stands for Object Oriented Programming, which is a programming paradigm based on the concept of 'objects'."
+                },
+                {
+                    question: "Which of the following is a principle of OOP?",
+                    options: ["Fragmentation", "Encapsulation", "Deconstruction", "Linearization"],
+                    correctAnswer: 1,
+                    explanation: "Encapsulation is one of the four main principles of OOP, along with inheritance, polymorphism, and abstraction."
+                },
+                {
+                    question: "What is a class in OOP?",
+                    options: ["A type of loop", "A blueprint for creating objects", "A built-in function", "A data type"],
+                    correctAnswer: 1,
+                    explanation: "A class is a blueprint or template that defines the variables and methods common to all objects of a certain kind."
+                },
+                {
+                    question: "Which symbol is used to create an object from a class in C++?",
+                    options: [".", "new", "create", "="],
+                    correctAnswer: 1,
+                    explanation: "In C++, the 'new' keyword is used to create an object from a class."
+                },
+                {
+                    question: "What is an object in OOP?",
+                    options: ["A function", "An instance of a class", "A variable", "A data type"],
+                    correctAnswer: 1,
+                    explanation: "An object is an instance of a class that has state (attributes) and behavior (methods)."
+                }
+            ],
+            normal: [
+                {
+                    question: "What is inheritance in OOP?",
+                    options: ["Creating multiple objects", "The process where one class acquires properties of another class", "Hiding implementation details", "Method overloading"],
+                    correctAnswer: 1,
+                    explanation: "Inheritance is a mechanism where a new class (derived) can inherit properties and behavior from an existing class (base)."
+                },
+                {
+                    question: "Which OOP concept describes the ability to present the same interface for different underlying forms?",
+                    options: ["Encapsulation", "Inheritance", "Polymorphism", "Abstraction"],
+                    correctAnswer: 2,
+                    explanation: "Polymorphism allows objects of different classes to be treated as objects of a common superclass, with the same interface but different implementations."
+                },
+                {
+                    question: "What is the purpose of a constructor in a class?",
+                    options: ["To destroy objects", "To initialize objects", "To inherit from another class", "To overload methods"],
+                    correctAnswer: 1,
+                    explanation: "A constructor is a special method that is automatically called when an object is created, used to initialize the object's attributes."
+                },
+                {
+                    question: "What does the 'this' keyword refer to in C++?",
+                    options: ["The current class", "The parent class", "The current object", "The main function"],
+                    correctAnswer: 2,
+                    explanation: "The 'this' keyword refers to the current instance of the class, allowing access to the object's members."
+                },
+                {
+                    question: "Which access modifier makes class members accessible only within the class?",
+                    options: ["public", "private", "protected", "static"],
+                    correctAnswer: 1,
+                    explanation: "The 'private' access modifier restricts access to class members so they can only be accessed within the class itself."
+                }
+            ],
+            hard: [
+                {
+                    question: "What is method overriding in OOP?",
+                    options: ["Creating multiple methods with the same name but different parameters", "Hiding a method in a parent class", "Providing a specific implementation of a method that is already defined in a parent class", "Creating static methods"],
+                    correctAnswer: 2,
+                    explanation: "Method overriding occurs when a derived class provides a specific implementation for a method that is already defined in its parent class."
+                },
+                {
+                    question: "What is a pure virtual function in C++?",
+                    options: ["A function that cannot be overridden", "A function with no parameters", "A function that must be implemented by derived classes", "A static function"],
+                    correctAnswer: 2,
+                    explanation: "A pure virtual function is a function declared in a base class that has no implementation and must be implemented by any derived class."
+                },
+                {
+                    question: "Which design pattern is used to create objects without specifying the exact class of object that will be created?",
+                    options: ["Singleton", "Factory", "Observer", "Decorator"],
+                    correctAnswer: 1,
+                    explanation: "The Factory design pattern provides an interface for creating objects without specifying their concrete classes."
+                },
+                {
+                    question: "What is the diamond problem in multiple inheritance?",
+                    options: ["A memory allocation issue", "An ambiguity that arises when two classes B and C inherit from A, and class D inherits from both B and C", "A problem with circular dependencies", "An issue with constructor initialization"],
+                    correctAnswer: 1,
+                    explanation: "The diamond problem occurs in multiple inheritance when a class inherits from two classes that both inherit from a common base class, causing ambiguity."
+                },
+                {
+                    question: "What is RAII in C++?",
+                    options: ["Random Access Iterator Implementation", "Resource Acquisition Is Initialization", "Runtime Array Index Iteration", "Recursive Algorithm Implementation Interface"],
+                    correctAnswer: 1,
+                    explanation: "RAII (Resource Acquisition Is Initialization) is a C++ programming technique where resource management is tied to object lifetime."
+                }
+            ]
+        };
+
+        // DOM Elements
+        const userInputScreen = document.getElementById('user-input-screen');
+        const difficultyScreen = document.getElementById('difficulty-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultsScreen = document.getElementById('results-screen');
+        
+        const nameInput = document.getElementById('name');
+        const ageInput = document.getElementById('age');
+        const startBtn = document.getElementById('start-btn');
+        const difficultyBtns = document.querySelectorAll('.difficulty-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const finishBtn = document.getElementById('finish-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const newQuizBtn = document.getElementById('new-quiz-btn');
+        const themeToggle = document.getElementById('theme-toggle');
+        
+        const userInfo = document.getElementById('user-info');
+        const scoreDisplay = document.getElementById('score-display');
+        const questionNumber = document.getElementById('question-number');
+        const difficultyBadge = document.getElementById('difficulty-badge');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const progressBar = document.getElementById('progress-bar');
+        const feedbackContainer = document.getElementById('feedback-container');
+        const feedbackText = document.getElementById('feedback-text');
+        
+        const finalScore = document.getElementById('final-score');
+        const scoreBar = document.getElementById('score-bar');
+        const performanceText = document.getElementById('performance-text');
+        const questionSummary = document.getElementById('question-summary');
+        
+        // Quiz state
+        let currentUser = {
+            name: '',
+            age: 0
+        };
+        
+        let quizState = {
+            difficulty: '',
+            currentQuestionIndex: 0,
+            score: 0,
+            answers: [],
+            questions: []
+        };
+        
+        // Event Listeners
+        startBtn.addEventListener('click', validateUserInput);
+        difficultyBtns.forEach(btn => {
+            btn.addEventListener('click', () => selectDifficulty(btn.dataset.difficulty));
+        });
+        nextBtn.addEventListener('click', loadNextQuestion);
+        finishBtn.addEventListener('click', showResults);
+        restartBtn.addEventListener('click', restartQuiz);
+        newQuizBtn.addEventListener('click', startNewQuiz);
+        themeToggle.addEventListener('click', toggleTheme);
+        
+        // Functions
+        function validateUserInput() {
+            const name = nameInput.value.trim();
+            const age = parseInt(ageInput.value);
+            
+            if (!name) {
+                showError(nameInput, 'Please enter your name');
+                return;
+            }
+            
+            if (isNaN(age) || age <= 0 || age > 120) {
+                showError(ageInput, 'Please enter a valid age (1-120)');
+                return;
+            }
+            
+            currentUser.name = name;
+            currentUser.age = age;
+            
+            userInputScreen.classList.add('hidden');
+            difficultyScreen.classList.remove('hidden');
+        }
+        
+        function showError(element, message) {
+            element.classList.add('border-red-500');
+            element.classList.add('bg-red-500');
+            element.classList.add('bg-opacity-20');
+            
+            const errorElement = document.createElement('div');
+            errorElement.classList.add('text-red-300', 'text-sm', 'mt-1', 'error-message');
+            errorElement.textContent = message;
+            
+            // Remove any existing error messages
+            const existingError = element.parentNode.querySelector('.error-message');
+            if (existingError) {
+                existingError.remove();
+            }
+            
+            element.parentNode.appendChild(errorElement);
+            
+            element.addEventListener('input', function() {
+                element.classList.remove('border-red-500');
+                element.classList.remove('bg-red-500');
+                element.classList.remove('bg-opacity-20');
+                const error = element.parentNode.querySelector('.error-message');
+                if (error) {
+                    error.remove();
+                }
+            }, { once: true });
+        }
+        
+        function selectDifficulty(difficulty) {
+            quizState.difficulty = difficulty;
+            quizState.questions = [...quizData[difficulty]];
+            quizState.currentQuestionIndex = 0;
+            quizState.score = 0;
+            quizState.answers = [];
+            
+            difficultyScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            
+            // Update user info
+            userInfo.textContent = `${currentUser.name} (${currentUser.age})`;
+            
+            // Update difficulty badge
+            difficultyBadge.textContent = difficulty.charAt(0).toUpperCase() + difficulty.slice(1);
+            
+            // Load first question
+            loadQuestion();
+        }
+        
+        function loadQuestion() {
+            const currentQuestion = quizState.questions[quizState.currentQuestionIndex];
+            
+            // Update question number
+            questionNumber.textContent = `Question ${quizState.currentQuestionIndex + 1}/${quizState.questions.length}`;
+            
+            // Update progress bar
+            const progress = ((quizState.currentQuestionIndex) / quizState.questions.length) * 100;
+            progressBar.style.width = `${progress}%`;
+            
+            // Update question text
+            questionText.textContent = currentQuestion.question;
+            
+            // Clear options container
+            optionsContainer.innerHTML = '';
+            
+            // Add options
+            currentQuestion.options.forEach((option, index) => {
+                const optionBtn = document.createElement('button');
+                optionBtn.classList.add('option-btn', 'w-full', 'text-left', 'p-5', 'rounded-lg', 'transition-all', 'hover:bg-white', 'hover:bg-opacity-15', 'border', 'border-white', 'border-opacity-10', 'text-lg');
+                optionBtn.textContent = option;
+                optionBtn.dataset.index = index;
+                optionBtn.addEventListener('click', () => selectAnswer(index));
+                optionsContainer.appendChild(optionBtn);
+            });
+            
+            // Hide feedback
+            feedbackContainer.classList.add('hidden');
+            
+            // Hide next button
+            nextBtn.classList.add('hidden');
+            finishBtn.classList.add('hidden');
+        }
+        
+        function selectAnswer(selectedIndex) {
+            const currentQuestion = quizState.questions[quizState.currentQuestionIndex];
+            const isCorrect = selectedIndex === currentQuestion.correctAnswer;
+            
+            // Disable all option buttons
+            const optionBtns = optionsContainer.querySelectorAll('.option-btn');
+            optionBtns.forEach(btn => {
+                btn.disabled = true;
+                
+                // Highlight correct and incorrect answers
+                const btnIndex = parseInt(btn.dataset.index);
+                if (btnIndex === currentQuestion.correctAnswer) {
+                    btn.classList.add('correct');
+                } else if (btnIndex === selectedIndex && !isCorrect) {
+                    btn.classList.add('incorrect');
+                }
+            });
+            
+            // Update score if correct
+            if (isCorrect) {
+                quizState.score++;
+                scoreDisplay.textContent = `Score: ${quizState.score}`;
+            }
+            
+            // Save answer
+            quizState.answers.push({
+                questionIndex: quizState.currentQuestionIndex,
+                selectedAnswer: selectedIndex,
+                isCorrect: isCorrect
+            });
+            
+            // Show feedback
+            feedbackContainer.classList.remove('hidden');
+            if (isCorrect) {
+                feedbackText.innerHTML = `<span class="text-green-300 text-xl">✓ Correct!</span> <p class="mt-2">${currentQuestion.explanation}</p>`;
+            } else {
+                feedbackText.innerHTML = `<span class="text-red-300 text-xl">✗ Incorrect.</span> <p class="mt-2">${currentQuestion.explanation}</p>`;
+            }
+            
+            // Show next button or finish button
+            if (quizState.currentQuestionIndex < quizState.questions.length - 1) {
+                nextBtn.classList.remove('hidden');
+            } else {
+                finishBtn.classList.remove('hidden');
+            }
+        }
+        
+        function loadNextQuestion() {
+            quizState.currentQuestionIndex++;
+            loadQuestion();
+        }
+        
+        function showResults() {
+            quizScreen.classList.add('hidden');
+            resultsScreen.classList.remove('hidden');
+            
+            // Update final score
+            finalScore.textContent = `${quizState.score}/${quizState.questions.length}`;
+            
+            // Update score bar
+            const scorePercentage = (quizState.score / quizState.questions.length) * 100;
+            scoreBar.style.width = `${scorePercentage}%`;
+            
+            // Update performance text
+            if (scorePercentage >= 80) {
+                performanceText.innerHTML = "🎉 <span class='gradient-text font-bold'>Excellent!</span> You've mastered this topic!";
+                createConfetti();
+            } else if (scorePercentage >= 60) {
+                performanceText.innerHTML = "👍 <span class='gradient-text font-bold'>Good job!</span> You have a solid understanding.";
+            } else if (scorePercentage >= 40) {
+                performanceText.textContent = "🙂 Not bad. With a bit more study, you'll improve.";
+            } else {
+                performanceText.textContent = "📚 Keep practicing. You'll get better with time.";
+            }
+            
+            // Generate question summary
+            questionSummary.innerHTML = '';
+            quizState.answers.forEach((answer, index) => {
+                const question = quizState.questions[answer.questionIndex];
+                
+                const summaryItem = document.createElement('div');
+                summaryItem.classList.add('bg-white', 'bg-opacity-10', 'p-6', 'rounded-lg', 'border', 'border-white', 'border-opacity-10');
+                
+                const questionHeader = document.createElement('div');
+                questionHeader.classList.add('flex', 'justify-between', 'items-center', 'mb-3');
+                
+                const questionTitle = document.createElement('div');
+                questionTitle.classList.add('text-white', 'font-medium', 'text-lg');
+                questionTitle.textContent = `Question ${index + 1}`;
+                
+                const statusBadge = document.createElement('div');
+                statusBadge.classList.add('px-3', 'py-1', 'rounded-full', 'text-sm', 'font-medium');
+                if (answer.isCorrect) {
+                    statusBadge.classList.add('bg-green-500', 'bg-opacity-30', 'text-green-100');
+                    statusBadge.textContent = 'Correct';
+                } else {
+                    statusBadge.classList.add('bg-red-500', 'bg-opacity-30', 'text-red-100');
+                    statusBadge.textContent = 'Incorrect';
+                }
+                
+                questionHeader.appendChild(questionTitle);
+                questionHeader.appendChild(statusBadge);
+                
+                const questionContent = document.createElement('div');
+                questionContent.classList.add('text-white', 'text-lg', 'mb-3');
+                questionContent.textContent = question.question;
+                
+                const answerContent = document.createElement('div');
+                answerContent.classList.add('text-white', 'text-opacity-90', 'mb-1');
+                
+                const yourAnswerLabel = document.createElement('span');
+                yourAnswerLabel.classList.add('text-white', 'text-opacity-70');
+                yourAnswerLabel.textContent = 'Your answer: ';
+                
+                const yourAnswer = document.createElement('span');
+                yourAnswer.classList.add(answer.isCorrect ? 'text-green-300' : 'text-red-300', 'font-medium');
+                yourAnswer.textContent = question.options[answer.selectedAnswer];
+                
+                answerContent.appendChild(yourAnswerLabel);
+                answerContent.appendChild(yourAnswer);
+                
+                summaryItem.appendChild(questionHeader);
+                summaryItem.appendChild(questionContent);
+                summaryItem.appendChild(answerContent);
+                
+                if (!answer.isCorrect) {
+                    const correctAnswerContent = document.createElement('div');
+                    correctAnswerContent.classList.add('text-white', 'text-opacity-90');
+                    
+                    const correctAnswerLabel = document.createElement('span');
+                    correctAnswerLabel.classList.add('text-white', 'text-opacity-70');
+                    correctAnswerLabel.textContent = 'Correct answer: ';
+                    
+                    const correctAnswer = document.createElement('span');
+                    correctAnswer.classList.add('text-green-300', 'font-medium');
+                    correctAnswer.textContent = question.options[question.correctAnswer];
+                    
+                    correctAnswerContent.appendChild(correctAnswerLabel);
+                    correctAnswerContent.appendChild(correctAnswer);
+                    
+                    summaryItem.appendChild(correctAnswerContent);
+                }
+                
+                questionSummary.appendChild(summaryItem);
+            });
+        }
+        
+        function restartQuiz() {
+            quizState.currentQuestionIndex = 0;
+            quizState.score = 0;
+            quizState.answers = [];
+            
+            scoreDisplay.textContent = `Score: ${quizState.score}`;
+            
+            resultsScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            
+            loadQuestion();
+        }
+        
+        function startNewQuiz() {
+            resultsScreen.classList.add('hidden');
+            difficultyScreen.classList.remove('hidden');
+        }
+        
+        function toggleTheme() {
+            document.body.classList.toggle('theme-light');
+            
+            // Update theme toggle icon
+            const svg = themeToggle.querySelector('svg');
+            if (document.body.classList.contains('theme-light')) {
+                svg.innerHTML = `
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                `;
+            } else {
+                svg.innerHTML = `
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                `;
+            }
+        }
+        
+        function createConfetti() {
+            const confettiContainer = document.getElementById('confetti-container');
+            confettiContainer.innerHTML = '';
+            
+            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ff8a00', '#da1b60', '#6a11cb', '#2575fc'];
+            
+            for (let i = 0; i < 150; i++) {
+                const confetti = document.createElement('div');
+                confetti.classList.add('confetti');
+                confetti.style.left = `${Math.random() * 100}%`;
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.width = `${Math.random() * 12 + 5}px`;
+                confetti.style.height = `${Math.random() * 12 + 5}px`;
+                confetti.style.animationDuration = `${Math.random() * 3 + 2}s`;
+                confetti.style.animationDelay = `${Math.random() * 2}s`;
+                
+                // Random shapes
+                if (Math.random() > 0.5) {
+                    confetti.style.borderRadius = '0%';
+                    confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+                }
+                
+                confettiContainer.appendChild(confetti);
+            }
+        }
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'93aaf3fc127d0048',t:'MTc0NjM5MjY5My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

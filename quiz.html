@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OOP Inheritance Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #1e3a8a, #7c3aed);
+            --secondary-gradient: linear-gradient(135deg, #10b981, #3b82f6);
+            --glass-bg: rgba(31, 41, 55, 0.7);
+            --glow-color: rgba(59, 130, 246, 0.3);
+        }
+
+        * {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(3deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 var(--glow-color); }
+            50% { transform: scale(1.03); box-shadow: 0 0 20px 5px var(--glow-color); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 var(--glow-color); }
+        }
+
+        @keyframes bgPulse {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.9); opacity: 0; }
+            50% { transform: scale(1.02); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
+            20%, 40%, 60%, 80% { transform: translateX(3px); }
+        }
+
+        @keyframes glow {
+            0% { box-shadow: 0 0 5px var(--glow-color); }
+            50% { box-shadow: 0 0 15px var(--glow-color); }
+            100% { box-shadow: 0 0 5px var(--glow-color); }
+        }
+
+        @keyframes ripple {
+            0% { transform: scale(0.8); opacity: 0.4; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+
+        @keyframes particle {
+            0% { transform: translateY(0) scale(1); opacity: 0.8; }
+            100% { transform: translateY(-100vh) scale(0.2); opacity: 0; }
+        }
+
+        .floating {
+            animation: float 5s ease-in-out infinite;
+        }
+
+        .pulse {
+            animation: pulse 2.5s infinite;
+        }
+
+        .bg-animate {
+            background-size: 300% 300%;
+            animation: bgPulse 12s ease infinite;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.6s ease-in;
+        }
+
+        .bounce-in {
+            animation: bounceIn 0.5s ease-out;
+        }
+
+        .shake {
+            animation: shake 0.4s;
+        }
+
+        .glow {
+            animation: glow 2s infinite;
+        }
+
+        .question-transition {
+            transition: all 0.4s ease;
+        }
+
+        .option-selected {
+            transform: scale(0.99);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4);
+        }
+
+        .correct-answer {
+            background: linear-gradient(135deg, #10b981, #059669) !important;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+            animation: pulse 0.8s;
+        }
+
+        .wrong-answer {
+            background: linear-gradient(135deg, #ef4444, #b91c1c) !important;
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+            animation: shake 0.4s;
+        }
+
+        .feedback-icon {
+            margin-left: 6px;
+            font-size: 14px;
+        }
+
+        .ripple {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ripple-effect {
+            position: absolute;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: scale(0);
+            animation: ripple 0.5s linear;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: fixed;
+            width: 6px;
+            height: 6px;
+            background: linear-gradient(45deg, #60a5fa, #a78bfa);
+            border-radius: 50%;
+            animation: particle 8s linear forwards;
+            z-index: 0;
+        }
+
+        body {
+            background: #0f172a;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .glass-effect {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .gradient-text {
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .hover-lift {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .hover-lift:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body class="min-h-screen text-white overflow-x-hidden">
+    <div class="fixed inset-0 bg-animate" style="background: linear-gradient(-45deg, #0f172a, #1e293b, #334155, #1e293b); z-index: -1;"></div>
+    
+    <div class="fixed top-0 left-0 w-full h-full overflow-hidden z-0">
+        <div class="absolute top-10 left-1/4 w-6 h-6 rounded-full bg-blue-500 opacity-20 floating" style="animation-delay: 0s;"></div>
+        <div class="absolute top-1/3 right-1/4 w-8 h-8 rounded-full bg-purple-500 opacity-20 floating" style="animation-delay: 1s;"></div>
+        <div class="absolute bottom-1/4 left-1/3 w-7 h-7 rounded-full bg-indigo-500 opacity-20 floating" style="animation-delay: 2s;"></div>
+        <div class="absolute top-2/3 right-1/3 w-10 h-10 rounded-full bg-pink-500 opacity-20 floating" style="animation-delay: 3s;"></div>
+    </div>
+
+    <div class="container mx-auto px-4 py-12 relative z-10">
+        <!-- Registration Screen -->
+        <div id="registration" class="max-w-md mx-auto glass-effect rounded-2xl p-8 fade-in">
+            <div class="text-center mb-8">
+                <h1 class="text-4xl font-bold gradient-text mb-2 hover-lift">OOP Inheritance Quiz</h1>
+                <p class="text-gray-300 text-sm">Master the art of inheritance in Object-Oriented Programming</p>
+            </div>
+            
+            <div class="space-y-6">
+                <div>
+                    <label for="name" class="block text-sm font-medium text-gray-300 mb-1">Your Name</label>
+                    <input type="text" id="name" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white hover-lift transition-all" placeholder="Enter your name" required>
+                </div>
+                
+                <div>
+                    <label for="age" class="block text-sm font-medium text-gray-300 mb-1">Your Age</label>
+                    <input type="number" id="age" min="10" max="100" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white hover-lift transition-all" placeholder="Enter your age" required>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Difficulty Level</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button data-difficulty="easy" class="difficulty-btn px-4 py-2 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 rounded-lg transition-all hover-lift text-sm">Easy</button>
+                        <button data-difficulty="normal" class="difficulty-btn px-4 py-2 bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-700 hover:to-yellow-800 rounded-lg transition-all hover-lift text-sm">Normal</button>
+                        <button data-difficulty="hard" class="difficulty-btn px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 rounded-lg transition-all hover-lift text-sm">Hard</button>
+                    </div>
+                </div>
+                
+                <button id="startQuiz" class="w-full mt-6 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-lg font-semibold text-white transition-all hover-lift pulse glow">
+                    Start Quiz <i class="fas fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz" class="hidden max-w-2xl mx-auto glass-effect rounded-2xl p-8">
+            <div class="flex justify-between items-center mb-6">
+                <div class="text-sm font-medium text-gray-300">
+                    Question <span id="currentQuestion">1</span>/<span id="totalQuestions">5</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-32 bg-gray-800/50 rounded-full h-2 mr-2">
+                        <div id="progressBar" class="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                    <span id="timer" class="text-sm font-medium text-gray-300">60s</span>
+                </div>
+            </div>
+            
+            <div id="questionContainer" class="question-transition">
+                <h2 id="question" class="text-xl font-semibold mb-6 bounce-in text-gray-100"></h2>
+                
+                <div id="options" class="space-y-3"></div>
+                
+                <div id="feedbackMessage" class="mt-4 hidden">
+                    <div id="feedbackContent" class="p-3 rounded-lg glass-effect bounce-in"></div>
+                </div>
+            </div>
+            
+            <div class="mt-8 flex justify-between">
+                <button id="prevBtn" class="px-4 py-2 bg-gray-800/50 hover:bg-gray-700/50 rounded-lg text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all hover-lift ripple">
+                    <i class="fas fa-arrow-left mr-2"></i> Previous
+                </button>
+                <button id="nextBtn" class="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-lg text-white transition-all hover-lift ripple glow">
+                    Next <i class="fas fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="results" class="hidden max-w-2xl mx-auto glass-effect rounded-2xl p-8">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold gradient-text mb-4">Quiz Completed!</h2>
+                <div id="scoreCircle" class="w-24 h-24 mx-auto bg-gradient-to-br from-green-500 to-blue-600 rounded-full flex items-center justify-center text-3xl font-bold text-white mb-4 pulse">
+                    <span id="scorePercentage">0</span>%
+                </div>
+                <p class="text-xl font-semibold"><span id="userName"></span>, your score: <span id="score" class="gradient-text">0</span>/<span id="maxScore">5</span></p>
+                <p id="difficultyDisplay" class="text-sm text-gray-300 mt-1"></p>
+            </div>
+            
+            <div class="mb-8">
+                <h3 class="text-xl font-semibold mb-4 border-b border-gray-700 pb-2">Performance Summary</h3>
+                <div id="performanceChart" class="h-48 flex items-end space-x-2 mb-4"></div>
+                <div id="feedback" class="text-center text-gray-300"></div>
+            </div>
+            
+            <div class="mb-8">
+                <h3 class="text-xl font-semibold mb-4 border-b border-gray-700 pb-2">Review Answers</h3>
+                <div id="answerReview" class="space-y-4"></div>
+            </div>
+            
+            <div class="flex justify-center">
+                <button id="restartQuiz" class="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-lg font-semibold text-white transition-all hover-lift pulse glow ripple">
+                    <i class="fas fa-redo mr-2"></i> Take Quiz Again
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Create particles
+        function createParticles() {
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                particle.style.left = `${Math.random() * 100}vw`;
+                particle.style.animationDuration = `${Math.random() * 5 + 5}s`;
+                particle.style.animationDelay = `${Math.random() * 5}s`;
+                document.body.appendChild(particle);
+                
+                setTimeout(() => {
+                    particle.remove();
+                    createParticles();
+                }, 10000);
+            }
+        }
+        createParticles();
+
+        // Quiz data (unchanged)
+        const quizData = {
+            easy: [
+                {
+                    question: "What is inheritance in OOP?",
+                    options: [
+                        "A way to create new classes from existing ones",
+                        "A method to hide data",
+                        "A technique to optimize code",
+                        "A type of loop structure"
+                    ],
+                    answer: 0,
+                    explanation: "Inheritance allows a new class to be based on an existing class, inheriting its properties and methods."
+                },
+                {
+                    question: "Which keyword is typically used to implement inheritance in Java?",
+                    options: [
+                        "extends",
+                        "implements",
+                        "inherits",
+                        "super"
+                    ],
+                    answer: 0,
+                    explanation: "The 'extends' keyword is used in Java to create a subclass that inherits from a superclass."
+                },
+                {
+                    question: "What is the main advantage of using inheritance?",
+                    options: [
+                        "Code reusability",
+                        "Faster execution",
+                        "Smaller memory footprint",
+                        "Better security"
+                    ],
+                    answer: 0,
+                    explanation: "Inheritance promotes code reusability by allowing new classes to reuse code from existing classes."
+                },
+                {
+                    question: "In inheritance, what is the class being inherited from called?",
+                    options: [
+                        "Superclass",
+                        "Subclass",
+                        "Child class",
+                        "Derived class"
+                    ],
+                    answer: 0,
+                    explanation: "The class being inherited from is called the superclass (or parent class or base class)."
+                },
+                {
+                    question: "Which type of inheritance is not supported in Java?",
+                    options: [
+                        "Multiple inheritance",
+                        "Single inheritance",
+                        "Multilevel inheritance",
+                        "Hierarchical inheritance"
+                    ],
+                    answer: 0,
+                    explanation: "Java doesn't support multiple inheritance with classes (a class inheriting from multiple classes) to avoid complexity and ambiguity."
+                }
+            ],
+            normal: [
+                {
+                    question: "What is method overriding in the context of inheritance?",
+                    options: [
+                        "Providing a specific implementation of a method already defined in the superclass",
+                        "Creating multiple methods with the same name",
+                        "Hiding a method from the superclass",
+                        "Changing a method's parameters"
+                    ],
+                    answer: 0,
+                    explanation: "Method overriding occurs when a subclass provides a specific implementation of a method that is already defined in its superclass."
+                },
+                {
+                    question: "What is the purpose of the 'super' keyword in inheritance?",
+                    options: [
+                        "To refer to the superclass members",
+                        "To call the subclass constructor",
+                        "To create a new superclass",
+                        "To prevent inheritance"
+                    ],
+                    answer: 0,
+                    explanation: "The 'super' keyword is used to refer to the superclass members (methods and variables) from the subclass."
+                },
+                {
+                    question: "Which principle of OOP is closely related to inheritance?",
+                    options: [
+                        "Polymorphism",
+                        "Encapsulation",
+                        "Abstraction",
+                        "Association"
+                    ],
+                    answer: 0,
+                    explanation: "Polymorphism is closely related to inheritance as it allows objects of different classes related by inheritance to be treated as objects of the superclass."
+                },
+                {
+                    question: "What is the difference between 'is-a' and 'has-a' relationship?",
+                    options: [
+                        "'Is-a' is inheritance, 'has-a' is composition",
+                        "'Is-a' is composition, 'has-a' is inheritance",
+                        "Both represent inheritance",
+                        "Both represent composition"
+                    ],
+                    answer: 0,
+                    explanation: "'Is-a' represents inheritance (e.g., a Car is a Vehicle), while 'has-a' represents composition (e.g., a Car has an Engine)."
+                },
+                {
+                    question: "What is multilevel inheritance?",
+                    options: [
+                        "When a class is derived from another derived class",
+                        "When a class inherits from multiple classes",
+                        "When multiple classes inherit from one class",
+                        "When inheritance spans multiple files"
+                    ],
+                    answer: 0,
+                    explanation: "Multilevel inheritance refers to a scenario where a class is derived from another derived class (e.g., Class C inherits from Class B which inherits from Class A)."
+                }
+            ],
+            hard: [
+                {
+                    question: "What is the diamond problem in multiple inheritance?",
+                    options: [
+                        "Ambiguity when a class inherits from two classes that have a common ancestor",
+                        "Difficulty in implementing deep inheritance hierarchies",
+                        "Circular inheritance between classes",
+                        "Memory issues with large inheritance trees"
+                    ],
+                    answer: 0,
+                    explanation: "The diamond problem occurs when a class inherits from two classes that both inherit from a common superclass, creating ambiguity about which path to inherit features from."
+                },
+                {
+                    question: "How does Java achieve multiple inheritance without the diamond problem?",
+                    options: [
+                        "Through interfaces",
+                        "Using abstract classes",
+                        "With final classes",
+                        "By restricting inheritance depth"
+                    ],
+                    answer: 0,
+                    explanation: "Java achieves a form of multiple inheritance through interfaces, which don't have the diamond problem because they don't contain implementation."
+                },
+                {
+                    question: "What is the Liskov Substitution Principle (LSP) in inheritance?",
+                    options: [
+                        "Subtypes must be substitutable for their base types",
+                        "All methods must be overridden in subclasses",
+                        "Inheritance hierarchies should be shallow",
+                        "Subclasses should add new functionality only"
+                    ],
+                    answer: 0,
+                    explanation: "LSP states that objects of a superclass should be replaceable with objects of its subclasses without breaking the application."
+                },
+                {
+                    question: "What is the difference between inheritance and delegation?",
+                    options: [
+                        "Inheritance is 'is-a', delegation is 'has-a' with forwarding",
+                        "Inheritance is static, delegation is dynamic",
+                        "Inheritance is for classes, delegation is for interfaces",
+                        "There is no practical difference"
+                    ],
+                    answer: 0,
+                    explanation: "Inheritance establishes an 'is-a' relationship, while delegation uses a 'has-a' relationship where one object forwards requests to another."
+                },
+                {
+                    question: "What is virtual inheritance in C++ used for?",
+                    options: [
+                        "To solve the diamond problem",
+                        "To make inheritance faster",
+                        "To allow dynamic inheritance",
+                        "To prevent method overriding"
+                    ],
+                    answer: 0,
+                    explanation: "Virtual inheritance in C++ is used to solve the diamond problem by ensuring that only one instance of the base class exists in the inheritance hierarchy."
+                }
+            ]
+        };
+
+        // DOM elements
+        const registrationScreen = document.getElementById('registration');
+        const quizScreen = document.getElementById('quiz');
+        const resultsScreen = document.getElementById('results');
+        const startQuizBtn = document.getElementById('startQuiz');
+        const difficultyBtns = document.querySelectorAll('.difficulty-btn');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const restartQuizBtn = document.getElementById('restartQuiz');
+        const questionElement = document.getElementById('question');
+        const optionsElement = document.getElementById('options');
+        const currentQuestionElement = document.getElementById('currentQuestion');
+        const totalQuestionsElement = document.getElementById('totalQuestions');
+        const progressBar = document.getElementById('progressBar');
+        const timerElement = document.getElementById('timer');
+        const scoreElement = document.getElementById('score');
+        const scorePercentageElement = document.getElementById('scorePercentage');
+        const maxScoreElement = document.getElementById('maxScore');
+        const userNameElement = document.getElementById('userName');
+        const difficultyDisplayElement = document.getElementById('difficultyDisplay');
+        const performanceChartElement = document.getElementById('performanceChart');
+        const feedbackElement = document.getElementById('feedback');
+        const answerReviewElement = document.getElementById('answerReview');
+        const feedbackMessage = document.getElementById('feedbackMessage');
+        const feedbackContent = document.getElementById('feedbackContent');
+        const scoreCircle = document.getElementById('scoreCircle');
+
+        // Quiz state
+        let currentDifficulty = 'normal';
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let userAnswers = [];
+        let timer;
+        let timeLeft = 60;
+        let selectedQuestions = [];
+        let userName = '';
+        let userAge = '';
+        let answerSelected = false;
+
+        // Initialize the quiz
+        function initQuiz() {
+            userName = document.getElementById('name').value.trim();
+            userAge = document.getElementById('age').value;
+            
+            if (!userName) {
+                alert('Please enter your name');
+                return;
+            }
+            
+            if (!userAge || userAge < 10 || userAge > 100) {
+                alert('Please enter a valid age between 10 and 100');
+                return;
+            }
+            
+            selectedQuestions = [...quizData[currentDifficulty]];
+            userNameElement.textContent = userName;
+            difficultyDisplayElement.textContent = `Difficulty: ${currentDifficulty.charAt(0).toUpperCase() + currentDifficulty.slice(1)}`;
+            maxScoreElement.textContent = selectedQuestions.length;
+            
+            registrationScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            showQuestion();
+            startTimer();
+        }
+
+        // Show current question
+        function showQuestion() {
+            const question = selectedQuestions[currentQuestionIndex];
+            questionElement.textContent = question.question;
+            optionsElement.innerHTML = '';
+            feedbackMessage.classList.add('hidden');
+            answerSelected = false;
+            
+            currentQuestionElement.textContent = currentQuestionIndex + 1;
+            totalQuestionsElement.textContent = selectedQuestions.length;
+            progressBar.style.width = `${((currentQuestionIndex + 1) / selectedQuestions.length) * 100}%`;
+            
+            question.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.classList.add('p-4', 'bg-gray-800/50', 'hover:bg-gray-700/50', 'rounded-lg', 'cursor-pointer', 'transition-all', 'duration-200', 'hover-lift', 'option', 'bounce-in', 'border', 'border-gray-700');
+                optionElement.style.animationDelay = `${index * 0.1}s`;
+                optionElement.textContent = option;
+                optionElement.dataset.index = index;
+                
+                if (userAnswers[currentQuestionIndex] === index) {
+                    optionElement.classList.add('option-selected');
+                    if (userAnswers[currentQuestionIndex] === question.answer) {
+                        optionElement.classList.add('correct-answer');
+                    } else {
+                        optionElement.classList.add('wrong-answer');
+                    }
+                    showFeedback(index === question.answer);
+                }
+                
+                optionElement.addEventListener('click', (e) => {
+                    if (!answerSelected) {
+                        createRipple(e, optionElement);
+                        selectOption(index);
+                    }
+                });
+                optionsElement.appendChild(optionElement);
+            });
+            
+            prevBtn.disabled = currentQuestionIndex === 0;
+            
+            if (currentQuestionIndex === selectedQuestions.length - 1) {
+                nextBtn.innerHTML = 'Submit <i class="fas fa-check ml-2"></i>';
+            } else {
+                nextBtn.innerHTML = 'Next <i class="fas fa-arrow-right ml-2"></i>';
+            }
+        }
+
+        // Create ripple effect
+        function createRipple(event, element) {
+            const rect = element.getBoundingClientRect();
+            const ripple = document.createElement('span');
+            ripple.classList.add('ripple-effect');
+            
+            const size = Math.max(rect.width, rect.height);
+            ripple.style.width = ripple.style.height = `${size}px`;
+            ripple.style.left = `${event.clientX - rect.left - size/2}px`;
+            ripple.style.top = `${event.clientY - rect.top - size/2}px`;
+            
+            element.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 500);
+        }
+
+        // Show feedback for selected answer
+        function showFeedback(isCorrect) {
+            const question = selectedQuestions[currentQuestionIndex];
+            feedbackMessage.classList.remove('hidden');
+            
+            if (isCorrect) {
+                feedbackContent.className = 'p-3 rounded-lg bg-green-900/50 text-green-100 bounce-in border border-green-500/30';
+                feedbackContent.innerHTML = `
+                    <i class="fas fa-check-circle text-green-400"></i> 
+                    <span class="ml-2">Correct! ${question.explanation}</span>
+                `;
+            } else {
+                feedbackContent.className = 'p-3 rounded-lg bg-red-900/50 text-red-100 bounce-in border border-red-500/30';
+                feedbackContent.innerHTML = `
+                    <i class="fas fa-times-circle text-red-400"></i> 
+                    <span class="ml-2">Incorrect. The correct answer is: ${question.options[question.answer]}</span>
+                    <div class="mt-2 text-sm">${question.explanation}</div>
+                `;
+            }
+        }
+
+        // Select an option
+        function selectOption(selectedOptionIndex) {
+            const question = selectedQuestions[currentQuestionIndex];
+            answerSelected = true;
+            
+            document.querySelectorAll('.option').forEach(opt => {
+                opt.classList.remove('option-selected');
+                opt.style.pointerEvents = 'none';
+            });
+            
+            const correctOption = document.querySelector(`.option[data-index="${question.answer}"]`);
+            correctOption.classList.add('correct-answer');
+            
+            if (selectedOptionIndex !== question.answer) {
+                const wrongOption = document.querySelector(`.option[data-index="${selectedOptionIndex}"]`);
+                wrongOption.classList.add('wrong-answer');
+            }
+            
+            userAnswers[currentQuestionIndex] = selectedOptionIndex;
+            
+            showFeedback(selectedOptionIndex === question.answer);
+        }
+
+        // Navigate to previous question
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                showQuestion();
+            }
+        }
+
+        // Navigate to next question or submit
+        function nextQuestion() {
+            if (typeof userAnswers[currentQuestionIndex] === 'undefined' && currentQuestionIndex < selectedQuestions.length - 1) {
+                document.getElementById('quiz').classList.add('shake');
+                setTimeout(() => {
+                    document.getElementById('quiz').classList.remove('shake');
+                }, 400);
+                return;
+            }
+            
+            if (currentQuestionIndex < selectedQuestions.length - 1) {
+                currentQuestionIndex++;
+                showQuestion();
+            } else {
+                submitQuiz();
+            }
+        }
+
+        // Start the timer
+        function startTimer() {
+            clearInterval(timer);
+            timeLeft = 60;
+            updateTimerDisplay();
+            
+            timer = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    submitQuiz();
+                }
+            }, 1000);
+        }
+
+        // Update timer display
+        function updateTimerDisplay() {
+            timerElement.textContent = `${timeLeft}s`;
+            
+            if (timeLeft <= 10) {
+                timerElement.classList.add('text-red-400', 'pulse');
+            } else {
+                timerElement.classList.remove('text-red-400', 'pulse');
+            }
+        }
+
+        // Submit the quiz and show results
+        function submitQuiz() {
+            clearInterval(timer);
+            
+            score = 0;
+            selectedQuestions.forEach((question, index) => {
+                if (userAnswers[index] === question.answer) {
+                    score++;
+                }
+            });
+            
+            scoreElement.textContent = score;
+            const percentage = Math.round((score / selectedQuestions.length) * 100);
+            scorePercentageElement.textContent = percentage;
+            
+            generatePerformanceChart();
+            generateFeedback(percentage);
+            reviewAnswers();
+            
+            if (percentage >= 70) {
+                createConfetti();
+            }
+            
+            quizScreen.classList.add('hidden');
+            resultsScreen.classList.remove('hidden');
+            
+            scoreCircle.classList.add('pulse');
+        }
+
+        // Create confetti effect
+        function createConfetti() {
+            const colors = ['#60a5fa', '#a78bfa', '#f472b6', '#facc15', '#4ade80'];
+            
+            for (let i = 0; i < 100; i++) {
+                const confetti = document.createElement('div');
+                confetti.classList.add('particle');
+                confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.left = `${Math.random() * 100}vw`;
+                confetti.style.width = `${Math.random() * 8 + 4}px`;
+                confetti.style.height = `${Math.random() * 8 + 4}px`;
+                confetti.style.animationDuration = `${Math.random() * 2 + 1.5}s`;
+                confetti.style.animationDelay = `${Math.random() * 0.5}s`;
+                
+                document.body.appendChild(confetti);
+                
+                setTimeout(() => {
+                    confetti.remove();
+                }, 3000);
+            }
+        }
+
+        // Generate performance chart
+        function generatePerformanceChart() {
+            performanceChartElement.innerHTML = '';
+            
+            selectedQuestions.forEach((_, index) => {
+                const barContainer = document.createElement('div');
+                barContainer.classList.add('flex-1', 'flex', 'flex-col', 'items-center');
+                
+                const bar = document.createElement('div');
+                bar.classList.add('w-full', 'rounded-t', 'transition-all', 'duration-500', 'bounce-in');
+                bar.style.animationDelay = `${index * 0.1}s`;
+                
+                if (userAnswers[index] === selectedQuestions[index].answer) {
+                    bar.classList.add('bg-gradient-to-b', 'from-green-500', 'to-green-700');
+                    bar.style.height = '100%';
+                } else if (typeof userAnswers[index] !== 'undefined') {
+                    bar.classList.add('bg-gradient-to-b', 'from-red-500', 'to-red-700');
+                    bar.style.height = '50%';
+                } else {
+                    bar.classList.add('bg-gradient-to-b', 'from-gray-500', 'to-gray-700');
+                    bar.style.height = '20%';
+                }
+                
+                const label = document.createElement('div');
+                label.classList.add('text-xs', 'mt-1', 'text-gray-300');
+                label.textContent = index + 1;
+                
+                barContainer.appendChild(bar);
+                barContainer.appendChild(label);
+                performanceChartElement.appendChild(barContainer);
+            });
+        }
+
+        // Generate feedback based on score
+        function generateFeedback(percentage) {
+            let feedback = '';
+            let emoji = '';
+            
+            if (percentage >= 80) {
+                feedback = `Outstanding work, ${userName}! You're an inheritance expert!`;
+                emoji = '🏆';
+            } else if (percentage >= 60) {
+                feedback = `Well done, ${userName}! Solid grasp of the concepts.`;
+                emoji = '🌟';
+            } else if (percentage >= 40) {
+                feedback = `Good effort, ${userName}! Keep studying to improve.`;
+                emoji = '💪';
+            } else {
+                feedback = `Don't give up, ${userName}! Review and try again.`;
+                emoji = '📚';
+            }
+            
+            feedbackElement.innerHTML = `${feedback} ${emoji}`;
+        }
+
+        // Review answers
+        function reviewAnswers() {
+            answerReviewElement.innerHTML = '';
+            
+            selectedQuestions.forEach((question, index) => {
+                const reviewItem = document.createElement('div');
+                reviewItem.classList.add('p-4', 'rounded-lg', 'glass-effect', 'bounce-in');
+                reviewItem.style.animationDelay = `${index * 0.1}s`;
+                
+                const questionText = document.createElement('h4');
+                questionText.classList.add('font-semibold', 'mb-2', 'text-gray-100');
+                questionText.textContent = `Question ${index + 1}: ${question.question}`;
+                
+                const userAnswer = document.createElement('p');
+                userAnswer.classList.add('mb-1');
+                
+                if (typeof userAnswers[index] !== 'undefined') {
+                    const isCorrect = userAnswers[index] === question.answer;
+                    userAnswer.innerHTML = `Your answer: <span class="${isCorrect ? 'text-green-400' : 'text-red-400'}">${question.options[userAnswers[index]]}</span>`;
+                } else {
+                    userAnswer.innerHTML = 'Your answer: <span class="text-yellow-400">Not answered</span>';
+                }
+                
+                const correctAnswer = document.createElement('p');
+                correctAnswer.classList.add('mb-2', 'text-green-400');
+                correctAnswer.textContent = `Correct answer: ${question.options[question.answer]}`;
+                
+                const explanation = document.createElement('p');
+                explanation.classList.add('text-sm', 'text-gray-300', 'italic');
+                explanation.textContent = question.explanation;
+                
+                reviewItem.appendChild(questionText);
+                reviewItem.appendChild(userAnswer);
+                reviewItem.appendChild(correctAnswer);
+                reviewItem.appendChild(explanation);
+                answerReviewElement.appendChild(reviewItem);
+            });
+        }
+
+        // Restart the quiz
+        function restartQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            userAnswers = [];
+            timeLeft = 60;
+            answerSelected = false;
+            
+            resultsScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            showQuestion();
+            startTimer();
+        }
+
+        // Add ripple effect to buttons
+        document.querySelectorAll('.ripple').forEach(button => {
+            button.addEventListener('click', function(e) {
+                createRipple(e, this);
+            });
+        });
+
+        // Event listeners
+        startQuizBtn.addEventListener('click', initQuiz);
+        prevBtn.addEventListener('click', prevQuestion);
+        nextBtn.addEventListener('click', nextQuestion);
+        restartQuizBtn.addEventListener('click', restartQuiz);
+
+        // Difficulty selection
+        difficultyBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                currentDifficulty = btn.dataset.difficulty;
+                
+                difficultyBtns.forEach(b => {
+                    b.classList.remove('ring-2', 'ring-white', 'ring-opacity-50', 'scale-105');
+                    if (b.dataset.difficulty === currentDifficulty) {
+                        b.classList.add('ring-2', 'ring-white', 'ring-opacity-50', 'scale-105');
+                    }
+                });
+            });
+        });
+
+        // Set default difficulty
+        document.querySelector(`.difficulty-btn[data-difficulty="${currentDifficulty}"]`).classList.add('ring-2', 'ring-white', 'ring-opacity-50', 'scale-105');
+    </script>
+</body>
+</html>
